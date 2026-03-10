@@ -2014,7 +2014,7 @@ function SetlistBuilderView({
         bpm: Number(t.bpm) || 120,
         camelot_key: String(t.camelot_key || t.key || '8A'),
       }))
-      const res = await fetch("http://localhost:8000/api/arrange", {
+      const res = await fetch("https://crowdsync-fh87.onrender.com/api/arrange", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(cleanLibrary),
