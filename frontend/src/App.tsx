@@ -757,7 +757,7 @@ function LivePerformanceView({
       bpm: t.bpm || activeTrackBpm,
       key: t.camelot_key || t.key || "8A",
       file: t.file,
-      image: `https://lastfm.freetls.fastly.net/i/u/300x300/${idx === 0 ? 'e9a28e75e53e4c4ba9414c19fe5dc62e' : idx === 1 ? '42e8cf3a88ba88f34dfbd5f0db2c6ba1' : '8d89e5fc6d5b4a8e99ab60aeb87ae199'}.png`
+      image: ""
     }));
   }, [vibe, library, localLibrary, activeTrack])
 
@@ -1068,7 +1068,7 @@ function LivePerformanceView({
                     </div>
                     <Badge variant="outline" className={`${req.status === 'perfect' ? 'bg-primary/10 text-primary border-primary/20' : req.status === 'neutral' ? 'bg-chart-2/10 text-chart-2 border-chart-2/20 text-black' : 'bg-destructive/10 text-destructive border-destructive/20'} shrink-0 flex gap-1 items-center`}>
                       {req.status === 'perfect' && <Sparkles className="w-3 h-3" />}
-                      {req.statusBadge}
+                      {req.status === 'perfect' ? 'Perfect Key' : req.status === 'neutral' ? 'Tempo Jump' : 'Vibe Mismatch'}
                     </Badge>
                   </div>
 
@@ -1119,16 +1119,9 @@ function LivePerformanceView({
           {suggestedTracks.length > 0 ? suggestedTracks.map((track, idx) => (
             <div key={idx} className="bg-secondary/30 border border-border/50 rounded-2xl p-4 flex items-center gap-4 group hover:bg-secondary/50 transition-colors">
               <div className="w-12 h-12 flex-shrink-0 bg-zinc-800 rounded-md border border-zinc-700 flex items-center justify-center relative overflow-hidden">
-                {track.image ? (
-                  <img
-                    src={track.image}
-                    alt={track.title}
-                    className="w-full h-full object-cover group-hover:opacity-30 transition-opacity"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                  />
-                ) : (
-                  <Music className="w-6 h-6 text-zinc-400 group-hover:opacity-30 transition-opacity" />
-                )}
+                <div className="w-full h-full bg-neutral-900 flex items-center justify-center">
+                  <Music className="w-6 h-6 text-neutral-500" />
+                </div>
                 <button
                   onClick={() => togglePlay(track)}
                   className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-md"
@@ -1850,7 +1843,7 @@ function TrackLabView({
         {
           activeMashup && selectedTrack && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-              <div className="bg-card w-full max-w-2xl rounded-3xl border border-border/50 shadow-2xl relative overflow-hidden flex flex-col">
+              <div className="bg-card w-full max-w-2xl max-h-[85vh] rounded-3xl border border-border/50 shadow-2xl relative overflow-hidden flex flex-col">
                 <div className="absolute -right-20 -top-20 w-64 h-64 bg-chart-3/10 rounded-full blur-3xl -z-10"></div>
 
                 <div className="p-6 border-b border-border/50 flex justify-between items-start">
