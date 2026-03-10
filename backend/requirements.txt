@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+requests
+python-dotenv
+# cors is built into fastapi
