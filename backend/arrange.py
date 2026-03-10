@@ -1,4 +1,5 @@
 from typing import List, Dict, Any
+import random
 
 def get_camelot_number(key: str) -> int:
     try:
@@ -125,6 +126,16 @@ def arrange_tracks(tracks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 
         # Selection
         next_track = unplayed_pool.pop(best_candidate_idx)
+        
+        # Anti-repetition: if this label is the same as the previous one, pick a fallback
+        prev_label = arranged_set[-1].get('transition_label') if len(arranged_set) > 0 else None
+        if best_label == prev_label and prev_label is not None:
+            alternates = [
+                label for label in ["HARMONIC FLOW", "RHYTHM BRIDGE", "STEADY GROOVE", "TEMPO RIDE", "SMOOTH GROOVE"]
+                if label != best_label
+            ]
+            best_label = random.choice(alternates)
+        
         next_track['transition_label'] = best_label
         arranged_set.append(next_track)
         

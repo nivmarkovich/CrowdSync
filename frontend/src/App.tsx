@@ -1120,7 +1120,12 @@ function LivePerformanceView({
             <div key={idx} className="bg-secondary/30 border border-border/50 rounded-2xl p-4 flex items-center gap-4 group hover:bg-secondary/50 transition-colors">
               <div className="w-12 h-12 flex-shrink-0 bg-zinc-800 rounded-md border border-zinc-700 flex items-center justify-center relative overflow-hidden">
                 {track.image ? (
-                  <img src={track.image} alt={track.title} className="w-full h-full object-cover group-hover:opacity-30 transition-opacity" />
+                  <img
+                    src={track.image}
+                    alt={track.title}
+                    className="w-full h-full object-cover group-hover:opacity-30 transition-opacity"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
                 ) : (
                   <Music className="w-6 h-6 text-zinc-400 group-hover:opacity-30 transition-opacity" />
                 )}
