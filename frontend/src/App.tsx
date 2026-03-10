@@ -198,6 +198,33 @@ function CrowdIntelligenceView() {
 
   const { localLibrary } = useLocalCrate()
 
+  // Calculated real BPM stats from imported tracks
+  const bpmStats = useMemo(() => {
+    const bpms = localLibrary.map((t: any) => t.bpm || 0).filter((b: number) => b > 0);
+    if (bpms.length === 0) return null;
+    const min = Math.min(...bpms);
+    const max = Math.max(...bpms);
+    const avg = Math.round(bpms.reduce((a: number, b: number) => a + b, 0) / bpms.length);
+    return { min, max, avg };
+  }, [localLibrary]);
+
+  // BPM-based genre heuristics
+  const genreData = useMemo(() => {
+    const total = localLibrary.filter((t: any) => (t.bpm || 0) > 0).length;
+    if (total === 0) return [];
+    const houseDisco = localLibrary.filter((t: any) => (t.bpm || 0) >= 120 && (t.bpm || 0) <= 125).length;
+    const techHouse = localLibrary.filter((t: any) => (t.bpm || 0) >= 126 && (t.bpm || 0) <= 130).length;
+    const techno = localLibrary.filter((t: any) => (t.bpm || 0) > 130).length;
+    const other = total - houseDisco - techHouse - techno;
+    const pct = (n: number) => Math.round((n / total) * 100);
+    return [
+      { label: 'Tech House (126-130)', val: pct(techHouse), color: 'bg-primary' },
+      { label: 'House / Disco (120-125)', val: pct(houseDisco), color: 'bg-chart-2' },
+      { label: 'Techno (131+)', val: pct(techno), color: 'bg-chart-4' },
+      ...(other > 0 ? [{ label: 'Other', val: pct(other), color: 'bg-chart-3' }] : []),
+    ].filter(g => g.val > 0);
+  }, [localLibrary]);
+
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-500">
       <div>
@@ -277,41 +304,47 @@ function CrowdIntelligenceView() {
             <h2 className="text-xl font-bold text-foreground">Calculated Crowd DNA Output</h2>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="flex flex-col justify-center items-center p-6 bg-card/50 rounded-2xl border border-border/50">
-              <p className="text-sm font-semibold text-muted-foreground uppercase tracking-widest mb-2">Target BPM Range</p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-bold text-foreground drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">122</span>
-                <span className="text-2xl text-muted-foreground">-</span>
-                <span className="text-5xl font-bold text-primary drop-shadow-[0_0_15px_oklch(0.82_0.19_145/0.4)]">128</span>
-              </div>
-              <p className="text-xs text-muted-foreground font-mono mt-4 bg-secondary/50 px-3 py-1 rounded-full border border-border">Optimal mix velocity</p>
+          {localLibrary.length === 0 ? (
+            <div className="flex h-48 items-center justify-center text-muted-foreground text-sm">
+              Import tracks to analyze crowd energy
             </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="flex flex-col justify-center items-center p-6 bg-card/50 rounded-2xl border border-border/50">
+                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-widest mb-2">BPM Range</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-5xl font-bold text-foreground drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">{bpmStats?.min ?? '—'}</span>
+                  <span className="text-2xl text-muted-foreground">-</span>
+                  <span className="text-5xl font-bold text-primary drop-shadow-[0_0_15px_oklch(0.82_0.19_145/0.4)]">{bpmStats?.max ?? '—'}</span>
+                </div>
+                <p className="text-xs text-muted-foreground font-mono mt-4 bg-secondary/50 px-3 py-1 rounded-full border border-border">Avg {bpmStats?.avg ?? '—'} BPM across {localLibrary.length} tracks</p>
+              </div>
 
-            <div>
-              <p className="text-sm font-semibold text-muted-foreground uppercase tracking-widest mb-4">Top Expected Genres</p>
-              <div className="space-y-4">
-                {[
-                  { label: 'Tech House', val: 60, color: 'bg-primary' },
-                  { label: 'Disco', val: 25, color: 'bg-chart-2' },
-                  { label: 'Indie Dance', val: 15, color: 'bg-chart-3' }
-                ].map((genre, idx) => (
-                  <div key={idx} className="space-y-1.5">
-                    <div className="flex justify-between items-center text-sm font-medium">
-                      <span className="text-foreground">{genre.label}</span>
-                      <span className="text-muted-foreground">{genre.val}%</span>
-                    </div>
-                    <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${genre.color} transition-all duration-1000 ease-out`}
-                        style={{ width: '0%' }}
-                      ></div>
-                    </div>
+              <div>
+                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-widest mb-4">Genre Heuristics (by BPM)</p>
+                {genreData.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No BPM data detected in imported tracks.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {genreData.map((genre, idx) => (
+                      <div key={idx} className="space-y-1.5">
+                        <div className="flex justify-between items-center text-sm font-medium">
+                          <span className="text-foreground">{genre.label}</span>
+                          <span className="text-muted-foreground">{genre.val}%</span>
+                        </div>
+                        <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full ${genre.color} transition-all duration-1000 ease-out`}
+                            style={{ width: `${genre.val}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
