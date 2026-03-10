@@ -1612,29 +1612,6 @@ function TrackLabView({
                   <Music className="w-12 h-12 text-muted-foreground" />
                 )}
               </div>
-              <div className="flex flex-col items-center">
-                <div className="relative w-24 h-24 mb-2">
-                  <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="42" fill="none" stroke="oklch(0.2 0 0)" strokeWidth="6" />
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="42"
-                      fill="none"
-                      stroke="oklch(0.82 0.19 145)"
-                      strokeWidth="6"
-                      strokeLinecap="round"
-                      strokeDasharray={264}
-                      strokeDashoffset={264 - (selectedAnalysis.matchScore / 100) * 264}
-                      className="transition-all duration-1000 ease-out drop-shadow-[0_0_8px_oklch(0.82_0.19_145)]"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-2xl font-bold font-mono text-primary shadow-primary">{selectedAnalysis.matchScore}</span>
-                    <span className="text-[9px] text-muted-foreground uppercase tracking-widest leading-none mt-1">Match</span>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Right Side: Details & Breakdowns */}
@@ -1675,37 +1652,7 @@ function TrackLabView({
                 </div>
               </div>
 
-              <div className="space-y-5">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs font-medium">
-                    <span className="text-muted-foreground">Tempo Fit (BPM)</span>
-                    <span className="text-foreground font-mono">{selectedAnalysis.tempoFit}%</span>
-                  </div>
-                  <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                    <div className="h-full bg-primary rounded-full shadow-[0_0_10px_oklch(0.82_0.19_145)] transition-all duration-1000 ease-out" style={{ width: `${selectedAnalysis.tempoFit}%` }}></div>
-                  </div>
-                </div>
 
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs font-medium">
-                    <span className="text-muted-foreground">Harmonic Synergy (Key)</span>
-                    <span className="text-foreground font-mono">{selectedAnalysis.harmonicSynergy}%</span>
-                  </div>
-                  <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                    <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${selectedAnalysis.harmonicSynergy}%`, background: 'oklch(0.82 0.17 80)' }}></div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs font-medium">
-                    <span className="text-muted-foreground">Crowd Energy / Vibe</span>
-                    <span className="text-foreground font-mono">{selectedAnalysis.crowdEnergy}%</span>
-                  </div>
-                  <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                    <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${selectedAnalysis.crowdEnergy}%`, background: 'var(--color-chart-3)' }}></div>
-                  </div>
-                </div>
-              </div>
 
               <div className="mt-8 p-4 rounded-xl bg-primary/5 border border-primary/20">
                 <div className="flex gap-3">
