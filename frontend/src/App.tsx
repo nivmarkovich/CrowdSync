@@ -1210,8 +1210,7 @@ function TrackLabView({
   togglePlay: (track: any) => void,
   setPlayQueue: (list: any[]) => void
 }) {
-  const { localLibrary, addToLocalLibrary } = useLocalCrate()
-  const [analyzeProgress, setAnalyzeProgress] = useState({ current: 0, total: 0, analyzing: false })
+  const { localLibrary, addToLocalLibrary, analyzeProgress, setAnalyzeProgress } = useLocalCrate()
   const [selectedTrack, setSelectedTrack] = useState<any | null>(null)
   const [selectedAnalysis, setSelectedAnalysis] = useState<any | null>(null)
   const [activeMashup, setActiveMashup] = useState<any | null>(null)
@@ -1321,7 +1320,7 @@ function TrackLabView({
 
 
   const handleFindMashupMatch = async (track: any, customTargetFeatures?: { bpm: number, rawKey?: number, rawMode?: number }) => {
-    if (expandedMashupTrackId === track.id) {
+    if (expandedMashupTrackId === track.id && !customTargetFeatures) {
       setExpandedMashupTrackId(null)
       return
     }
@@ -1423,6 +1422,41 @@ function TrackLabView({
     }
   }
 
+  // Shuffle matches without closing the results panel
+  const handleShuffleMatches = async () => {
+    if (!selectedTrack || !selectedAnalysis) return;
+    const activeBpm = Number(selectedAnalysis.bpm);
+    if (!activeBpm) return;
+
+    setIsShuffling(true);
+    await new Promise(r => setTimeout(r, 200));
+
+    const rawMatches = localLibrary.filter((t: any) =>
+      Math.abs(t.bpm - activeBpm) <= 3 &&
+      t.title !== selectedTrack.name
+    );
+
+    const shuffled = [...rawMatches].sort(() => 0.5 - Math.random());
+    const finalMatches = shuffled.slice(0, 5).map((t: any) => {
+      const diff = ((activeBpm - (t.bpm || activeBpm)) / (t.bpm || activeBpm)) * 100;
+      const pitchString = diff > 0 ? `+${diff.toFixed(1)}%` : `${diff.toFixed(1)}%`;
+      return {
+        id: t.id,
+        title: t.title,
+        artist: t.artist,
+        image: "",
+        bpm: t.bpm,
+        key: "Unknown",
+        pitchString,
+        actualBpm: t.bpm || activeBpm,
+        mixingOptions: generateMixingOptions(),
+      };
+    });
+
+    setMashupMatches(finalMatches);
+    setIsShuffling(false);
+  }
+
   return (
     <>
       <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto">
@@ -1432,7 +1466,7 @@ function TrackLabView({
               Track Lab
             </h1>
             <p className="text-sm text-muted-foreground mt-2">
-              Deconstruct tracks and see how they fit your Crowd DNA.
+              Analyze your tracks and discover perfect harmonic matches and mashup combinations.
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -1725,12 +1759,7 @@ function TrackLabView({
               <div className="flex flex-col gap-4 relative">
                 <div className="flex justify-center mb-2">
                   <button
-                    onClick={async () => {
-                      setIsShuffling(true);
-                      await new Promise(r => setTimeout(r, 200)); // Smooth UX transition feel
-                      handleFindMashupMatch(selectedTrack);
-                      setIsShuffling(false);
-                    }}
+                    onClick={handleShuffleMatches}
                     disabled={isShuffling}
                     className="flex items-center gap-2 h-9 px-6 rounded-full bg-secondary/80 text-foreground font-semibold text-xs hover:bg-chart-2/20 hover:text-chart-2 transition-all border border-border/60 shadow-sm"
                   >
@@ -1995,8 +2024,7 @@ function SetlistBuilderView({
   const [arrangeState, setArrangeState] = useState<"idle" | "loading" | "done">("idle")
   const [arrangedSet, setArrangedSet] = useState<any[]>([])
 
-  const { localLibrary, setLocalLibrary } = useLocalCrate()
-  const [isImporting, setIsImporting] = useState(false)
+  const { localLibrary, setLocalLibrary, isImporting, setIsImporting } = useLocalCrate()
   const hasImported = localLibrary.length > 0
 
   const handleFolderImport = async (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -11,17 +11,33 @@ export type LocalTrack = {
     file?: File;
 };
 
+export type AnalyzeProgressState = {
+    analyzing: boolean;
+    current: number;
+    total: number;
+};
+
 type LocalCrateContextType = {
     localLibrary: LocalTrack[];
     setLocalLibrary: (tracks: LocalTrack[]) => void;
     addToLocalLibrary: (tracks: LocalTrack[]) => void;
     clearLocalLibrary: () => void;
+    isImporting: boolean;
+    setIsImporting: (v: boolean) => void;
+    analyzeProgress: AnalyzeProgressState;
+    setAnalyzeProgress: (v: AnalyzeProgressState) => void;
 };
 
 const LocalCrateContext = createContext<LocalCrateContextType | undefined>(undefined);
 
 export const LocalCrateProvider = ({ children }: { children: ReactNode }) => {
     const [localLibrary, setLocalLibrary] = useState<LocalTrack[]>([]);
+    const [isImporting, setIsImporting] = useState(false);
+    const [analyzeProgress, setAnalyzeProgress] = useState<AnalyzeProgressState>({
+        analyzing: false,
+        current: 0,
+        total: 0,
+    });
 
     const addToLocalLibrary = (tracks: LocalTrack[]) => {
         setLocalLibrary((prev) => [...prev, ...tracks]);
@@ -33,7 +49,7 @@ export const LocalCrateProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return (
-        <LocalCrateContext.Provider value={{ localLibrary, setLocalLibrary, addToLocalLibrary, clearLocalLibrary }}>
+        <LocalCrateContext.Provider value={{ localLibrary, setLocalLibrary, addToLocalLibrary, clearLocalLibrary, isImporting, setIsImporting, analyzeProgress, setAnalyzeProgress }}>
             {children}
         </LocalCrateContext.Provider>
     );
